@@ -1,0 +1,3 @@
+# list of project dependencies which can be installed using pip install -r requirements.txt
+# to update - run: pip install --upgrade pip
+

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index Page</title>
+</head>
+<body>
+    <h1>Welcome to UK Train Time Tables</h1>
+    <h2>Please Enter your Train Station Code</h2>
+    <h3>The Train Station Code is a three letter code for your choosen train station. E.g.  'RMD' = Richmond</h3>
+    <h3>If you do not know your train station id then click <a href="http://www.railwaycodes.org.uk/stations/stationa.shtm">here</a> /n 
+        to find a list of possible train station codes. Make sure to choose the first three letter code in brackets in the column with the station name.</h3>
+    <h3>Note: the http://www.railwaycodes.org.uk/stations/stationa.shtm website also provides a list of duplicate codes for england. </h3>
+    <form action="/get_next_train" method = "POST">
+        <p>Train Station Code <input type = "text" name = "station_id" /></p>
+        <!-- <p>Field2 <input type = "text" name = "Field2_name" /></p>
+        <p>Field3 <input type = "text" name = "Field3_name" /></p> -->
+        <p><input type = "submit" value = "get_next_train" /></p>
+    </form>
+</body>
+</html>

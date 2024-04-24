@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next 5 Trains - Form</title>
+</head>
+<body>
+    <h1>Next 5 trains arriving.</h1>
+    <h2>Enter the train station id(or code) for your station.  eg. RMD = Richmond</h2>
+    <h3>If you do not know your train station id then click <a href="http://www.railwaycodes.org.uk/stations/stationa.shtm">here</a> to find a list of possible train station codes. Make sure to choose the first three letter code in brackets in the column with the station name.</h3>
+    <h3>Note: the http://www.railwaycodes.org.uk/stations/stationa.shtm website also provides a list of duplicate codes for england. </h3>
+    <form action="/next_5trains_results" method="post">
+        <label for="station_id">Enter Station Code (3 letters):</label><br>
+        <input type="text" id="station_id" name="station_id" maxlength="3" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

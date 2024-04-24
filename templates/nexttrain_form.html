@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index Page</title>
+    <style>
+        body {
+            background-color: #f8b1b1; /* Light background color */
+            font-family: Arial, sans-serif; /* Set font family */
+        }
+        .container {
+            max-width: 600px; /* Limit container width */
+            margin: 0 auto; /* Center the container */
+            padding: 20px; /* Add some padding */
+            text-align: center; /* Center-align content */
+        }
+        h1 {
+            color: #333; 
+            text-align: center; /* Center align the heading */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to UK Train Time Tables</h1>
+        <h2>Please Enter your Train Station Code</h2>
+        <h3>The Train Station Code is a three letter code for your choosen train station. E.g.  'RMD' = Richmond, 'ZPU' = East Putney, 'LVJ' = Liverpool James Street</h3>
+        <h3>If you do not know your train station id then click <a href="http://www.railwaycodes.org.uk/stations/stationa.shtm" target="_blank">here</a> to find a list of possible train station codes. Make sure to choose the first three letter code in brackets in the column with the station name.</h3>
+        <h3>Note: the http://www.railwaycodes.org.uk/stations/stationa.shtm website also provides a list of duplicate codes for england. </h3>
+    
+        <form action="/get_next_train" method = "POST">
+            <label for="station_id">Station Code:</label>
+            <input type="text" id="station_id" name="station_id" minlength="3" maxlength="3" pattern="[A-Za-z]{3}" required>
+            <input type = "submit" value = "submit">
+
+        <!-- <input type="text" id="station_code" name="station_code" minlength="3" maxlength="3" pattern="[A-Za-z]{3}" required> -->
+        <!-- <p>Field2 <input type = "text" name = "Field2_name" /></p>
+        <p>Field3 <input type = "text" name = "Field3_name" /></p> -->
+        <!-- <p><input type = "submit" value = "submit" /></p> -->
+        </form>
+    </div>
+    <!-- <form action="/submit" method="post">
+        <input type="radio" name="option" value="a" id="option_a">
+        <label for="option_a">Display Next 5 Trains</label><br>
+
+        <input type="radio" name="option" value="b" id="option_b">
+        <label for="option_b">Display Current Train Line</label><br>
+        <input type="submit" value="Submit">
+    </form> -->
+</body>
+</html>

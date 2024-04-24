@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Train Information</title>
+</head>
+<body>
+
+  <h1>Train Information</h1>
+  <p>Your Train Station is: {{ your_station }}</p>
+  <p>Your Train will arrive at platform: {{ train_platform }}</p>
+  <p>The next train arrival time is: {{ arrival_time }}</p>
+
+
+  <h2><a href="/all_trains">Show more trains</a></h2>
+  <h2><a href="/all_buses">Show more buses</a></h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Arrival Time</th>
+        <th>Origin</th>
+        <th>Destination</th>
+        <th>Platform</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for arrival in train_data %}
+      <tr>
+        <td>{{ arrival.mode }}</td>
+        <td>{{ arrival.aimed_arrival_time }}</td>
+        <td>{{ arrival.origin_name }}</td>
+        <td>{{ arrival.destination_name }}</td>
+        <td>{{ arrival.platform }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  <p></p>
+</body>
+</html>
+
+ 
