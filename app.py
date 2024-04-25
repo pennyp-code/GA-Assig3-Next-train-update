@@ -18,6 +18,37 @@ GET /v3/uk/train/station_timetables/{id}.json
 
 # we want passenger trains as we want to catch the train
 # train_status = passenger
+
+Notes for readme file.  
+- currently the port is set at 8000:  please feel free to change that to suit your requirements.
+- the index page is set to '/Welcome'
+- the index displays information to the user about entering their 3letter code for their choosen station.  there are some examples, however due to 
+ a. the time delay between Australia and the UK means there is a period of time where there may be no trains or buses expected for the next 12 hours.
+ b. the API only allows 30 hits per day.
+ c. each train station has different busy times for trains and buses.
+
+- the return page automatically returns the route /show_nexttrain.html.  
+On this page the the current time for the uk is always shown, then if there is data returned the following data is shown. station choosen, the next train arrival time, and what platform your train will arrive on. (If the next arrival is a bus the platform is shown as None)
+The user has the option to press two buttons:
+    1) show/hide more trains - which shows the trains due to arrive at the choosen station in the next 12 hours.
+    2) show/hid buses - which shows the buses due to arrive at the choosen station in the next 12 hours. (this is a nice to have and additional to the original scope)
+
+Return data is of json format.
+ 
+Development and Testing
+- for the purposes of testing I mainly used RMD and RED (Richmond and Redruth) stations as they seem to have a spread of bus and train arrivals 
+- I ran out of API calls for the short time i had to design and test so there may be instances during future development that cases may arrise that have not been tested for.
+- the user is given information to find codes as there many trainlines and a multiude of codes.  Some of which are duplicates. 
+- i have commented out the print statements used in testing (but these are handy and can be uncommented out.(i do not know the python equivallent to kdebug for print statements))
+
+
+Future updates:
+- As this app is now functioning the next step would be for me to increase the to_offset to its max and check a large range of stations to ensure the majority of train 
+    and bus arrivals are covered, especially for those stations that have less volume.   
+-  I have not had time to investigate what happens for those train stations with duplicate codes.  
+    I suppect for the future if i update this app i would have to add in either a check in return data that checks the station name for all data and allows the user to 
+    choose which of the stations they want to look at or add a column so that each train and bus shows which station. 
+
 """
 import os
 import requests
@@ -35,8 +66,11 @@ print(API_Key)
 API_ID = os.getenv('API_ID')
 print(API_ID)
 
+# Global variable to store train data
+more_buses_data = []
 
 def get_train_data(station_id):
+    global more_trains_data, more_buses_data
 
     api_url = 'https://transportapi.com/v3/uk/train/station_timetables/{id}.json'
 
@@ -50,7 +84,7 @@ def get_train_data(station_id):
           'trainStation' : station_id,
           'type' : 'arrival',
 #           'datetime': '2022-02-03T20:30:00+01:00',
-          'to_offset' : 'PT06:00:00',
+          'to_offset' : 'PT12:00:00',
           'from_offset' : '-PT00:00:00'
         }
 
@@ -64,32 +98,53 @@ def get_train_data(station_id):
         print("Failed to retrieve data:", response.text)
         # return {}
     
-
 @app.route('/Welcome', methods=['GET', 'POST'])
 def enter_Station_id_form():
     return render_template('nexttrain_form.html')
 
 @app.route('/get_next_train', methods=['POST'])
 def get_next_train():
-    station_id = request.form['station_id'].strip().upper()  # Get the user-entered station code
-    if station_id.isalpha() and len(station_id) == 3:  # Check if the code is alphabetic and has a length of 3
-        station_id = f"crs:{station_id}"  # Add "crs:" to the beginning of the station code
-        data = get_train_data(station_id)# for train in newdata['arrivals']['all']:
-        print(data)
-        # print(data['station_name'])
-            
-#  so we can see that out train data is actually nested so:
-        train_data = data['arrivals']['all']
-        your_station = data['station_name']
-        print(your_station)
+    
+# Get the user-entered station code
+    station_id = request.form['station_id'].strip().upper()
 
-# i did get the time conversion for the uk from chatgpt# 
+# Check if the code is alphabetic and has a length of 3, Add "crs:" to the beginning of the station code
+# for train in data['arrivals']['all']:
+    if station_id.isalpha() and len(station_id) == 3:  
+        station_id = f"crs:{station_id}"  
+        data = get_train_data(station_id)
+        print(data)
+
+        # i did get the time conversion for the uk from chatgpt# 
         uk_timezone = pytz.timezone('Europe/London')
         current_datetime_uk = datetime.now(uk_timezone)
         current_time_uk = current_datetime_uk.time()
 
         print("Current time in the UK:", current_time_uk.strftime('%H:%M')) 
         current_time = current_datetime_uk
+        current_time_format = current_time_uk.strftime('%H:%M')
+
+        # print(data['station_name'])
+        if data is None or 'arrivals' not in data:
+            return render_template('show_nexttrain.html', no_data_message="No train data available at the moment.  Please check the official website for your station for future arrivals.")
+            
+#  so we can see that out train data is actually nested so:
+        train_data = data['arrivals']['all']
+        your_station = data['station_name']
+        print(your_station)
+
+# Clear previous data
+        more_buses_data.clear() 
+
+        if not more_buses_data:
+            no_bus_message = f"No bus data available!  This page does not show system outages.  If no trains data please check the official timetable for the station you have selected."
+        else:
+            no_bus_message = None 
+
+        if not train_data:
+            no_train_message = f"No train data available! This page does not show system outages.  If no bus data please check the official timetable for the station you have selected."
+        else:
+            no_train_message = None 
 
         for train in train_data:
             mode = train['mode']
@@ -97,83 +152,39 @@ def get_next_train():
             print(f"Train mode: {mode}, Arrival time: {arrival_time}")
     
         arrival_time = datetime.strptime(train['aimed_arrival_time'], '%H:%M')
-    
         your_station = None 
-        
         train_platform = None   
         next_train = None
-        train_origin = None
-        train_destination = None
-        
-        next_bus = None
-        bus_origin = None
-        bus_destination = None 
 
         for arrival in train_data:
-    #     arrival_time = datetime.strptime(train['aimed_arrival_time'], '%H:%M')
-            # arrival_time = uk_timezone.localize(datetime.strptime(f"{datetime.now().date()} {arrival['aimed_arrival_time']}", "%Y-%m-%d %H:%M"))
             arrival_time = uk_timezone.localize(datetime.strptime(arrival['aimed_arrival_time'], "%H:%M")).strftime("%H:%M")
             print(f'arrival_time = {arrival_time}')
     
-#     if train or bus
+#     if train
         if arrival['mode'] == 'train':
             if next_train is None or (arrival_time > current_time and arrival_time < next_train):
                 next_train = arrival_time
-                train_origin = arrival['origin_name']
                 train_platform = arrival['platform']
-                train_destination = arrival['destination_name']
                 your_station = data['station_name']
-            
-        if arrival['mode'] == 'bus':
+
+#     if bus
+        elif arrival['mode'] == 'bus':
             if next_bus is None or (arrival_time > current_time and arrival_time < next_train):
                 next_bus = arrival_time
-                bus_origin = arrival['origin_name']
-                bus_destination = arrival['destination_name']
+                more_buses_data.append({
+                    'mode': arrival['mode'],
+                    'aimed_arrival_time': arrival['aimed_arrival_time'],
+                    'origin_name': arrival['origin_name'],
+                    'destination_name': arrival['destination_name']
+                })
+                print("bus added")
 
-        # if next_train:
-        #     print(f'the next train for {your_station} is arriving at {next_train}, on Platform {train_platform}, from: {train_origin}, destination: {train_destination}')
+        return render_template('show_nexttrain.html', train_data=train_data, your_station=your_station, arrival_time=arrival_time, train_platform=train_platform, more_buses_data=more_buses_data, no_bus_message=no_bus_message, current_time_format = current_time_format)
 
-        # if next_bus:
-        #     print(f'the next train is arriving at {next_bus}, from: {bus_origin}, destination: {bus_destination}')
-
-            
-            # look at Geoffs example.
-        # next_train_info = data
-            # next_train_info = get_next_train(newdata['station_name'])
-
-        return render_template('show_nexttrain.html', train_data=train_data, your_station=your_station, arrival_time=arrival_time, train_platform=train_platform)
-    # else:
-    #         # if 
-    #     return "Failed to fetch train data2."
     else:
         return "Invalid station code. Please enter a 3-letter alphabetic code."
 
 
-# Route to show more trains
-@app.route('/show_more_trains')
-def show_more_trains():
-    # Logic to fetch and display more trains
-    # Your logic to fetch more trains data goes here
-
-    # Render template with more trains data
-    return render_template('show_more_trains.html', trains=more_trains_data)
-
-# Route to show buses
-@app.route('/show_buses')
-def show_buses():
-    # Logic to fetch and display buses
-    # Your logic to fetch buses data goes here
-
-    # Render template with buses data
-    return render_template('show_buses.html', buses=buses_data)
-
-# @app.route('/reviews/<ID>')
-# def show_reviews(ID):
-#     for review in reviews:
-#         if review['id'] ==ID:
-#             review_text = review['review_text']
-#             book_title = review['book_title']
-#     return render_template('show.html', ID=ID,book_title =book_title, review_text=review_text )
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    app.run(port=8000, debug=True)

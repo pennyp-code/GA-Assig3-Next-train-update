@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Bus Information</title>
+</head>
+<body>
+    <h1>Bus Information</h1>
+    <p>Your Train Station is: {{ your_station }}</p>
+  
+    {% if arrival_time %}
+      <p>The next bus arrival time is: {{ arrival_time }}</p>
+    {% else %}
+      <p>No buses due to arrive in the next 12 hours. Please check official bus time tables for your station.</p>
+    {% endif %}
+  
+    {% if more_buses_data %}
+      <h2><a href="/show_more_buses">Show more buses</a></h2>
+    {% endif %}
+  </body>
+  </html>

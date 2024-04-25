@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>More Bus Information</title>
+    <style>
+        body {
+            background-color: #f8b1b1; /* Light background color */
+            font-family: Arial, sans-serif; /* Set font family */
+        }
+        .container {
+            max-width: 600px; /* Limit container width */
+            margin: 0 auto; /* Center the container */
+            padding: 20px; /* Add some padding */
+            text-align: center; /* Center-align content */
+        }
+        h1 {
+            color: #333; 
+            text-align: center; /* Center align the heading */
+        }
+    </style>
+</head>
+<body>
+    <h1>Buses Due at {{ your_station }} Station for the next 12hours.</h1>
+    <p>Please note: This site is primarily for the use of time tabled trains, thus the buses shown here may not be a complete range of all buses to arrive at your choosen train station.  Please refer to an official bus timetable for further details.  (this may be updated in the future)</p>
+    <table>
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th>Arrival Time</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Platform</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for arrival in trains %}
+          <tr>
+            <td>{{ arrival.mode }}</td>
+            <td>{{ arrival.aimed_arrival_time }}</td>
+            <td>{{ arrival.origin_name }}</td>
+            <td>{{ arrival.destination_name }}</td>
+            <td>{{ arrival.platform }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h2><a href="/show_next_train">Back to Next Train</a></h2>
+
+    </body>
+    </html>
+  

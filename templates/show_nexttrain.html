@@ -3,45 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Train Information</title>
+    <title>Next Train and Bus Information</title>
+    <style>
+        body {
+            background-color: #f8b1b1;
+            font-family: Arial, sans-serif; 
+        }
+        .container {
+            max-width: 600px; /* Limit container width */
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333; 
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .station-name {
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #000000;
+        }
+        .hidden {
+            display: none;
+        }
+        .button {
+            background-color: #3633a7; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; /* Remove border */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Add cursor pointer */
+            transition: background-color 0.3s; /* Add smooth transition */
+        }
+        .button:hover {
+            background-color: #3b10d9; /* Darker color on hover */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Collapse borders */
+            margin-top: 20px; 
+        }
+        th, td {
+            padding: 8px; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd; 
+        }
+        th {
+            background-color: #f2f2f2; 
+        }
+        tr:hover {
+            background-color: #f5f5f5; /* Light gray background color on hover */
+        }
+
+    </style>
 </head>
 <body>
+    <h1>Train Information</h1>
+    <p><strong>current time in the UK is:</strong> {{ current_time_format }}</p>
 
-  <h1>Train Information</h1>
-  <p>Your Train Station is: {{ your_station }}</p>
-  <p>Your Train will arrive at platform: {{ train_platform }}</p>
-  <p>The next train arrival time is: {{ arrival_time }}</p>
+        {% if no_data_message %}
+            <p>{{ no_data_message }}</p>
+        {% else %}
 
+            {% if arrival_time %}
+                <p><strong>Your Train Station is:</strong> <span class='station-name'>{{ your_station }}</span></p>
+                <p><strong>The next train arrival time is:</strong> {{ arrival_time }}</p>
+                <p><strong>Your Train will arrive at platform:</strong> {{ train_platform }}</p>
+            {% else %}
+                <p>No trains due to arrive in the next 12 hours. Please check official train timetables for your station.</p>
+            {% endif %}
 
-  <h2><a href="/all_trains">Show more trains</a></h2>
-  <h2><a href="/all_buses">Show more buses</a></h2>
+        <form action="/load_more_trains" method="get">
+            <button type="button" id="toggle-trains">Show/Hide More Trains</button>
+        </form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Mode</th>
-        <th>Arrival Time</th>
-        <th>Origin</th>
-        <th>Destination</th>
-        <th>Platform</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for arrival in train_data %}
-      <tr>
-        <td>{{ arrival.mode }}</td>
-        <td>{{ arrival.aimed_arrival_time }}</td>
-        <td>{{ arrival.origin_name }}</td>
-        <td>{{ arrival.destination_name }}</td>
-        <td>{{ arrival.platform }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        <table id="train-table" class="hidden">
+            <thead>
+                <tr>
+                    <th>Mode</th>
+                    <th>Arrival Time</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Platform</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for arrival in train_data %}
+                    {% if arrival.mode == 'train' %}
+                    <tr>
+                        <td>{{ arrival.mode }}</td>
+                        <td>{{ arrival.aimed_arrival_time }}</td>
+                        <td>{{ arrival.origin_name }}</td>
+                        <td>{{ arrival.destination_name }}</td>
+                        <td>{{ arrival.platform }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
 
+        <form action="/load_buses" method="get">
+            <button type="button" id="toggle-buses">Show/Hide More Buses</button>
+        </form>
 
-  <p></p>
+        <table id="bus-table" class="hidden">
+            <thead>
+                <tr>
+                    <th>Mode</th>
+                    <th>Arrival Time</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if no_bus_message %}
+                    <tr>
+                        <td colspan="4">{{ no_bus_message }}</td>
+                    </tr>
+                {% else %}
+                    {% for arrival in more_buses_data %}
+                        <tr>
+                            <td>{{ arrival.mode }}</td>
+                            <td>{{ arrival.aimed_arrival_time }}</td>
+                            <td>{{ arrival.origin_name }}</td>
+                            <td>{{ arrival.destination_name }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+        {% endif %}
+
+    <script>
+        // Function to toggle visibility of train table
+        function toggleTrainTable() {
+            var trainTable = document.getElementById('train-table');
+            trainTable.classList.toggle('hidden');
+        }
+
+        // Event listener for train button click
+        document.getElementById('toggle-trains').addEventListener('click', function() {
+            toggleTrainTable();
+        });
+
+        // Function to toggle visibility of bus table
+        function toggleBusTable() {
+            var busTable = document.getElementById('bus-table');
+            busTable.classList.toggle('hidden');
+        }
+
+        // Event listener for bus button click
+        document.getElementById('toggle-buses').addEventListener('click', function() {
+            toggleBusTable();
+        });
+    </script>
 </body>
 </html>
-
- 
